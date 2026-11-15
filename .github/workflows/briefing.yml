@@ -1,0 +1,29 @@
+name: Morning briefing
+on:
+  schedule:
+    # Cron is UTC. Two runs so it's 9:06 AM local all year; the script sends from the right one.
+    # Set for US Eastern: 13:06 UTC = 9:06 EDT, 14:06 UTC = 9:06 EST. Change for your timezone.
+    - cron: "6 13 * * *"
+    - cron: "6 14 * * *"
+  workflow_dispatch: {}    # "Run workflow" button for testing
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python test_briefing.py && python briefing.py
+        env:
+          SCHEDULE_CRON: ${{ github.event.schedule }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CANVAS_ICS_URL: ${{ secrets.CANVAS_ICS_URL }}
+          TIMEZONE: ${{ vars.TIMEZONE }}
+          WEATHER_LAT: ${{ vars.WEATHER_LAT }}
+          WEATHER_LON: ${{ vars.WEATHER_LON }}
+          COURSE_SITE_URL: ${{ vars.COURSE_SITE_URL }}
+          COURSE_SITE_NAME: ${{ vars.COURSE_SITE_NAME }}

@@ -1,0 +1,27 @@
+name: Evening check-in
+on:
+  schedule:
+    # Every 30 min, 6pm to 12:30am US Eastern (UTC range covers EST and EDT). Change for your timezone.
+    # The script only acts 6:30-11:30pm local and stops once you reply in Telegram.
+    - cron: "0,30 22,23,0-5 * * *"
+  workflow_dispatch: {}
+
+concurrency: evening   # never two at once
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python briefing.py --evening
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CANVAS_ICS_URL: ${{ secrets.CANVAS_ICS_URL }}
+          TIMEZONE: ${{ vars.TIMEZONE }}
+          COURSE_SITE_URL: ${{ vars.COURSE_SITE_URL }}
+          COURSE_SITE_NAME: ${{ vars.COURSE_SITE_NAME }}
